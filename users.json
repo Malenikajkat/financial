@@ -1,0 +1,41 @@
+{
+  "katerina" : {
+    "login" : "katerina",
+    "email" : "malenikajkat@yandex.ru",
+    "passwordHash" : "$2a$10$X9azXHeeONlDOBl6HB.ABu8KxCUmdKRQcZuoPRCzZR7t00G7I/fM6",
+    "wallet" : {
+      "balance" : 0.0,
+      "transactions" : [ ],
+      "allCategories" : [ ],
+      "totalExpense" : 0.0,
+      "totalIncome" : 0.0
+    },
+    "budgets" : { }
+  },
+  "katrin" : {
+    "login" : "katrin",
+    "email" : "malenikajkat@mail.ru",
+    "passwordHash" : "$2a$10$AAAk7.Ca/wSPA3M2qjQHKe8/j949AKHALpLGu8xJTWKjTK0D6esie",
+    "wallet" : {
+      "balance" : 0.0,
+      "transactions" : [ ],
+      "allCategories" : [ ],
+      "totalExpense" : 0.0,
+      "totalIncome" : 0.0
+    },
+    "budgets" : { }
+  },
+  "kat" : {
+    "login" : "kat",
+    "email" : "malenikajkat@gmail.com",
+    "passwordHash" : "$2a$10$TKmXze8aD8QaLHs5nnCzROeRjWMGD6/ypwMhfqPvMCtKJBx39JZKG",
+    "wallet" : {
+      "balance" : 0.0,
+      "transactions" : [ ],
+      "allCategories" : [ ],
+      "totalExpense" : 0.0,
+      "totalIncome" : 0.0
+    },
+    "budgets" : { }
+  }
+}

@@ -1,27 +1,22 @@
 package org.malenikajkat.exception;
 
 public class ValidationException extends Exception {
-
-    private final String fieldName;
-    private final String invalidValue;
-    private final String errorDescription;
-
-    public ValidationException(String fieldName, String invalidValue, String errorDescription) {
-        super(String.format("Ошибка в поле \"%s\": %s (получено: %s)", fieldName, errorDescription, invalidValue));
-        this.fieldName = fieldName;
-        this.invalidValue = invalidValue;
-        this.errorDescription = errorDescription;
+    public ValidationException(String message) {
+        super(message);
     }
 
-    public String getFieldName() {
-        return fieldName;
+    public ValidationException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public String getInvalidValue() {
-        return invalidValue;
+    public static final String INVALID_INPUT_DATA = "Некорректные входные данные.";
+    public static final String FIELD_REQUIRED_ERROR = "Обязательное поле отсутствует.";
+
+    public static ValidationException invalidInputData() {
+        return new ValidationException(INVALID_INPUT_DATA);
     }
 
-    public String getErrorDescription() {
-        return errorDescription;
+    public static ValidationException requiredFieldError(String fieldName) {
+        return new ValidationException(FIELD_REQUIRED_ERROR + " Поле: " + fieldName);
     }
 }

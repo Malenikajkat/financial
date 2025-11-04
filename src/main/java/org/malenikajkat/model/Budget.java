@@ -1,6 +1,7 @@
 package org.malenikajkat.model;
 
 import java.io.Serializable;
+import java.util.Locale;
 
 public class Budget implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -55,7 +56,7 @@ public class Budget implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("%s: лимит %.2f, потрачено %.2f, остаток %.2f",
+        return String.format(Locale.US, "%s: лимит %.2f, потрачено %.2f, остаток %.2f",
                 category, limit, spent, getRemaining());
     }
 

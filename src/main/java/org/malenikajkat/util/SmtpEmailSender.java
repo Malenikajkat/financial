@@ -1,8 +1,17 @@
 package org.malenikajkat.util;
 
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import org.malenikajkat.exception.EmailSendingException;
+
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.Authenticator;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+
 import java.util.Properties;
 
 public class SmtpEmailSender implements EmailSender {
@@ -57,8 +66,10 @@ public class SmtpEmailSender implements EmailSender {
 
             Transport.send(message);
 
+        } catch (AddressException e) {
+            throw new EmailSendingException("Некорректный адрес получателя: " + e.getMessage(), e);
         } catch (MessagingException e) {
-            throw new EmailSendingException("Ошибка при отправке email", e);
+            throw new EmailSendingException("Ошибка при отправке email: " + e.getMessage(), e);
         }
     }
 

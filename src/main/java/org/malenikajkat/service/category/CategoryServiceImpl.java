@@ -3,6 +3,7 @@ package org.malenikajkat.service.category;
 import org.malenikajkat.model.Category;
 import org.malenikajkat.model.User;
 import org.malenikajkat.exception.ServiceException;
+import org.malenikajkat.exception.ValidationException;
 import org.malenikajkat.util.ValidatorService;
 
 import java.util.HashSet;
@@ -18,10 +19,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void addCategory(User user, String categoryName) throws ServiceException {
+    public void addCategory(User user, String categoryName) throws ServiceException, ValidationException {
         validateUser(user);
-        validatorService.validateCategory(categoryName, "названия категории");
-
+        validatorService.validateCategory(categoryName, "название категории");
 
         if (hasCategory(user, categoryName)) {
             throw new ServiceException("Категория '" + categoryName + "' уже существует");
@@ -32,9 +32,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void removeCategory(User user, String categoryName) throws ServiceException {
+    public void removeCategory(User user, String categoryName) throws ServiceException, ValidationException {
         validateUser(user);
-        validatorService.validateCategory(categoryName, "названия категории");
+        validatorService.validateCategory(categoryName, "название категории");
 
         if (!hasCategory(user, categoryName)) {
             throw new ServiceException("Категория '" + categoryName + "' не найдена");
@@ -44,9 +44,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public boolean hasCategory(User user, String categoryName) throws ServiceException {
+    public boolean hasCategory(User user, String categoryName) throws ServiceException, ValidationException {
         validateUser(user);
-        validatorService.validateCategory(categoryName, "названия категории");
+        validatorService.validateCategory(categoryName, "название категории");
 
         return user.getWallet().hasCategory(categoryName);
     }
@@ -62,10 +62,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void renameCategory(User user, String oldName, String newName) throws ServiceException {
+    public void renameCategory(User user, String oldName, String newName) throws ServiceException, ValidationException {
         validateUser(user);
-        validatorService.validateCategory(oldName, "старого названия категории");
-        validatorService.validateCategory(newName, "нового названия категории");
+        validatorService.validateCategory(oldName, "старое название категории");
+        validatorService.validateCategory(newName, "новое название категории");
 
         if (!hasCategory(user, oldName)) {
             throw new ServiceException("Категория '" + oldName + "' не найдена");
@@ -74,8 +74,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new ServiceException("Категория '" + newName + "' уже существует");
         }
 
-        user.getWallet().removeCategory(oldName);
-        user.getWallet().addCategory(newName);
+        user.getWallet().renameCategory(oldName, newName);
     }
 
     private void validateUser(User user) throws ServiceException {

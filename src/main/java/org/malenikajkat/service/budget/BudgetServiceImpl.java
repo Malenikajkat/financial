@@ -3,6 +3,7 @@ package org.malenikajkat.service.budget;
 import org.malenikajkat.model.Budget;
 import org.malenikajkat.model.User;
 import org.malenikajkat.exception.ServiceException;
+import org.malenikajkat.exception.ValidationException;
 import org.malenikajkat.util.ValidatorService;
 
 public class BudgetServiceImpl implements BudgetService {
@@ -14,35 +15,35 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
     @Override
-    public void setBudget(User user, String category, double limit) throws ServiceException {
+    public void setBudget(User user, String category, double limit) throws ServiceException, ValidationException {
         validateUser(user);
-        validatorService.validateCategory(category, "категории бюджета");
-        validatorService.validatePositiveFloat(limit, "лимита бюджета");
+        validatorService.validateCategory(category, "категория бюджета");
+        validatorService.validatePositiveFloat(limit, "лимит бюджета");
 
         Budget budget = new Budget(category, limit);
         user.addBudget(budget);
     }
 
     @Override
-    public Budget getBudget(User user, String category) throws ServiceException {
+    public Budget getBudget(User user, String category) throws ServiceException, ValidationException {
         validateUser(user);
-        validatorService.validateCategory(category, "категории бюджета");
+        validatorService.validateCategory(category, "категория бюджета");
 
         return user.getBudget(category);
     }
 
     @Override
-    public boolean hasBudget(User user, String category) throws ServiceException {
+    public boolean hasBudget(User user, String category) throws ServiceException, ValidationException {
         validateUser(user);
-        validatorService.validateCategory(category, "категории бюджета");
+        validatorService.validateCategory(category, "категория бюджета");
 
         return user.hasBudget(category);
     }
 
     @Override
-    public void removeBudget(User user, String category) throws ServiceException {
+    public void removeBudget(User user, String category) throws ServiceException, ValidationException {
         validateUser(user);
-        validatorService.validateCategory(category, "категории бюджета");
+        validatorService.validateCategory(category, "категория бюджета");
 
         if (!user.hasBudget(category)) {
             throw new ServiceException("Бюджет для категории '" + category + "' не найден");
@@ -51,9 +52,9 @@ public class BudgetServiceImpl implements BudgetService {
     }
 
     @Override
-    public void resetSpent(User user, String category) throws ServiceException {
+    public void resetSpent(User user, String category) throws ServiceException, ValidationException {
         validateUser(user);
-        validatorService.validateCategory(category, "категории бюджета");
+        validatorService.validateCategory(category, "категория бюджета");
 
         Budget budget = user.getBudget(category);
         if (budget == null) {

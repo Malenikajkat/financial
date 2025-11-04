@@ -1,11 +1,15 @@
 package org.malenikajkat.service.finance;
 
-import org.malenikajkat.model.*;
+import org.malenikajkat.model.Budget;
+import org.malenikajkat.model.User;
+import org.malenikajkat.model.Transaction;
+import org.malenikajkat.exception.ServiceException;
+import org.malenikajkat.exception.ValidationException;
 import org.malenikajkat.service.budget.BudgetService;
 import org.malenikajkat.service.category.CategoryService;
-import org.malenikajkat.exception.ServiceException;
 import org.malenikajkat.util.ValidatorService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,30 +19,27 @@ public class FinanceServiceImpl implements FinanceService {
     private final BudgetService budgetService;
     private final CategoryService categoryService;
 
-    public FinanceServiceImpl(ValidatorService validatorService,
-                              BudgetService budgetService,
-                              CategoryService categoryService) {
-        this.validatorService = validatorService;
-        this.budgetService = budgetService;
-        this.categoryService = categoryService;
+    public FinanceServiceImpl(ValidatorService validatorService, BudgetService budgetService, CategoryService categoryService) {
+        this.validatorService = Objects.requireNonNull(validatorService, "ValidatorService не может быть null");
+        this.budgetService = Objects.requireNonNull(budgetService, "BudgetService не может быть null");
+        this.categoryService = Objects.requireNonNull(categoryService, "CategoryService не может быть null");
     }
 
     @Override
-    public void addIncome(User user, double amount, String category) throws ServiceException {
+    public void addIncome(User user, double amount, String category) throws ServiceException, ValidationException {
         validateUser(user);
         validatorService.validatePositiveFloat(amount, "суммы дохода");
         validatorService.validateCategory(category, "категории дохода");
 
-        // Автоматически добавляем категорию, если её нет
         if (!categoryService.hasCategory(user, category)) {
             categoryService.addCategory(user, category);
         }
 
-        user.getWallet().addIncome(amount, category);
+        user.getWallet().addIncome(amount, category, LocalDate.now());
     }
 
     @Override
-    public void addExpense(User user, double amount, String category) throws ServiceException {
+    public void addExpense(User user, double amount, String category) throws ServiceException, ValidationException {
         validateUser(user);
         validatorService.validatePositiveFloat(amount, "суммы расхода");
         validatorService.validateCategory(category, "категории расхода");
@@ -62,37 +63,42 @@ public class FinanceServiceImpl implements FinanceService {
             categoryService.addCategory(user, category);
         }
 
-        user.getWallet().addExpense(amount, category);
+        user.getWallet().addExpense(amount, category, LocalDate.now());
     }
 
     @Override
-    public List<Transaction> getAllTransactions(User user) throws ServiceException {
+    public List<Transaction> getAllTransactions(User user) throws ServiceException, ValidationException {
         validateUser(user);
         return user.getWallet().getTransactions();
     }
 
     @Override
-    public List<Transaction> getTransactionsByType(User user, boolean isIncome) throws ServiceException {
+    public List<Transaction> getTransactionsByType(User user, boolean isIncome) throws ServiceException, ValidationException {
         validateUser(user);
-        return user.getWallet().getTransactionsByType(isIncome);
+        Transaction.Type type = isIncome ? Transaction.Type.INCOME : Transaction.Type.EXPENSE;
+        return user.getWallet().getTransactionsByType(type);
     }
 
     @Override
-    public double getTotalByCategory(User user, String category, boolean isIncome) throws ServiceException {
+    public double getTotalByCategory(User user, String category, boolean isIncome) throws ServiceException, ValidationException {
         validateUser(user);
-        validatorService.validateCategory(category, "категории транзакций");
+        if (category == null || category.trim().isEmpty()) {
+            Transaction.Type type = isIncome ? Transaction.Type.INCOME : Transaction.Type.EXPENSE;
+            return user.getWallet().getTotalAmountByType(type);
+        }
 
-        return user.getWallet().getTotalByCategory(category, isIncome);
+        Transaction.Type type = isIncome ? Transaction.Type.INCOME : Transaction.Type.EXPENSE;
+        return user.getWallet().getTotalByCategory(category, type);
     }
 
     @Override
-    public void transfer(User sender, User receiver, double amount, String comment) throws ServiceException {
+    public void transfer(User sender, User receiver, double amount, String comment) throws ServiceException, ValidationException {
         validateUser(sender);
         validateUser(receiver);
         validatorService.validatePositiveFloat(amount, "суммы перевода");
 
-        if (sender.equals(receiver)) {
-            throw new ServiceException("Нельзя перевести средства самому себе");
+        if (Objects.equals(sender, receiver)) {
+            throw new ServiceException("Нельзя перевести деньги самому себе");
         }
 
         if (sender.getWallet().getBalance() < amount) {
@@ -100,14 +106,35 @@ public class FinanceServiceImpl implements FinanceService {
                     sender.getWallet().getBalance() + ", сумма перевода: " + amount);
         }
 
-        sender.getWallet().addExpense(amount, "Перевод: " + receiver.getLogin());
+        Transaction expenseTx = new Transaction(
+                amount,
+                "Перевод на счёт пользователя: " + receiver.getLogin(),
+                "перевод",
+                Transaction.Type.EXPENSE,
+                LocalDate.now()
+        );
+        Transaction incomeTx = new Transaction(
+                amount,
+                "Получил перевод от пользователя: " + sender.getLogin(),
+                "перевод",
+                Transaction.Type.INCOME,
+                LocalDate.now()
+        );
 
-        receiver.getWallet().addIncome(amount, "Перевод от: " + sender.getLogin());
+        sender.getWallet().addTransaction(expenseTx);
+        receiver.getWallet().addTransaction(incomeTx);
+
 
         if (comment != null && !comment.trim().isEmpty()) {
-            Transaction commentTx = new Transaction(0, "Комментарий к переводу: " + comment, true);
-            sender.getWallet().transactions.add(commentTx);
-            receiver.getWallet().transactions.add(commentTx);
+            Transaction commentTx = new Transaction(
+                    0,
+                    "Комментарий к переводу: " + comment,
+                    "комментарий",
+                    Transaction.Type.INCOME,
+                    LocalDate.now()
+            );
+            sender.getWallet().addTransaction(commentTx);
+            receiver.getWallet().addTransaction(commentTx);
         }
     }
 

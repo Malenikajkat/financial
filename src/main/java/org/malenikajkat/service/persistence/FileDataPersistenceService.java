@@ -4,9 +4,10 @@ import org.malenikajkat.model.User;
 import org.malenikajkat.exception.ServiceException;
 import org.malenikajkat.util.JsonUtils;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.*;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class FileDataPersistenceService implements DataPersistenceService {
@@ -39,8 +40,8 @@ public class FileDataPersistenceService implements DataPersistenceService {
         }
 
         Path userFile = getUserFilePath(user.getLogin());
-        try (Writer writer = Files.newBufferedWriter(userFile)) {
-            jsonUtils.toJson(user, writer);
+        try (var writer = Files.newBufferedWriter(userFile)) {
+            jsonUtils.getMapper().writeValue(writer, user);
         } catch (IOException e) {
             throw new ServiceException("Ошибка при сохранении пользователя: " + user.getLogin(), e);
         }
@@ -52,13 +53,13 @@ public class FileDataPersistenceService implements DataPersistenceService {
             return Optional.empty();
         }
 
-        Path userFile = getUserFilePath(login);
+        Path userFile = getUserFilePath(login.trim());
         if (!Files.exists(userFile)) {
             return Optional.empty();
         }
 
-        try (Reader reader = Files.newBufferedReader(userFile)) {
-            User user = jsonUtils.fromJson(reader, User.class);
+        try (var reader = Files.newBufferedReader(userFile)) {
+            User user = jsonUtils.getMapper().readValue(reader, User.class);
             return Optional.of(user);
         } catch (IOException e) {
             throw new ServiceException("Ошибка при загрузке пользователя: " + login, e);
@@ -71,7 +72,7 @@ public class FileDataPersistenceService implements DataPersistenceService {
             return false;
         }
 
-        Path userFile = getUserFilePath(login);
+        Path userFile = getUserFilePath(login.trim());
         return Files.exists(userFile);
     }
 
@@ -95,7 +96,7 @@ public class FileDataPersistenceService implements DataPersistenceService {
             throw new ServiceException("Логин не может быть пустым");
         }
 
-        Path userFile = getUserFilePath(login);
+        Path userFile = getUserFilePath(login.trim());
         if (!Files.exists(userFile)) {
             throw new ServiceException("Пользователь не найден: " + login);
         }
@@ -125,8 +126,8 @@ public class FileDataPersistenceService implements DataPersistenceService {
     }
 
     private Optional<User> loadUserFromFile(Path filePath) {
-        try (Reader reader = Files.newBufferedReader(filePath)) {
-            User user = jsonUtils.fromJson(reader, User.class);
+        try (var reader = Files.newBufferedReader(filePath)) {
+            User user = jsonUtils.getMapper().readValue(reader, User.class);
             return Optional.of(user);
         } catch (IOException e) {
             System.err.println("Ошибка при чтении файла: " + filePath + ", причина: " + e.getMessage());
