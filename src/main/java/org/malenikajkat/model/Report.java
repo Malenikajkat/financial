@@ -64,19 +64,33 @@ public class Report {
 
     private void appendSection(StringBuilder builder, String sectionTitle, Map<String, Double> values, double total) {
         builder.append(sectionTitle).append("\n");
-        for (Map.Entry<String, Double> entry : values.entrySet()) {
-            builder.append("  ").append(entry.getKey())
-                    .append(": ")
-                    .append(String.format(Locale.US, "%.2f", entry.getValue()))
-                    .append("\n");
-        }
+
+        values.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEachOrdered(e -> {
+                    builder.append("  ").append(e.getKey())
+                            .append(": ")
+                            .append(String.format(Locale.US, "%.2f", e.getValue()))
+                            .append("\n");
+                });
+
         builder.append("Итого: ").append(String.format(Locale.US, "%.2f", total)).append("\n");
     }
 
     private void appendBudgets(StringBuilder builder) {
         builder.append("Бюджеты:\n");
-        for (Budget budget : budgetDetails) {
-            builder.append("  ").append(budget).append("\n");
-        }
+
+        budgetDetails.stream()
+                .sorted((b1, b2) -> b1.getCategory().compareTo(b2.getCategory()))
+                .forEachOrdered(budget -> {
+                    builder.append("  ").append(budget.getCategory())
+                            .append(": лимит ")
+                            .append(String.format(Locale.US, "%.2f", budget.getLimit()))
+                            .append(", потрачено ")
+                            .append(String.format(Locale.US, "%.2f", budget.getSpent()))
+                            .append(", остаток ")
+                            .append(String.format(Locale.US, "%.2f", budget.getRemaining()))
+                            .append("\n");
+                });
     }
 }

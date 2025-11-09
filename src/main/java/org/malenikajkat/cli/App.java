@@ -24,7 +24,6 @@ import org.malenikajkat.util.ValidatorService;
 
 public class App {
     public static void main(String[] args) {
-        // Используем конкретную реализацию
         UserStorage storage = new InMemoryUserStorage();
         ValidatorService validatorService = new ValidatorService();
         AuthService authService = new AuthServiceImpl(storage);

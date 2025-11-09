@@ -23,7 +23,6 @@ public class Wallet implements Serializable {
     @JsonProperty("totalIncome")
     private double totalIncome = 0.0;
 
-    // Геттеры
     public double getTotalExpense() { return totalExpense; }
     public void setTotalExpense(double totalExpense) { this.totalExpense = totalExpense; }
 

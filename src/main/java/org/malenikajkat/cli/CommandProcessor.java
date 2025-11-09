@@ -254,8 +254,8 @@ public class CommandProcessor {
 
     private void viewReport() {
         try {
-            LocalDate startDate = parseDate(promptFor("начальную дату", "YYYY-MM-DD")); // Использует метод с двумя аргументами
-            LocalDate endDate = parseDate(promptFor("конечную дату", "YYYY-MM-DD")); // Использует метод с двумя аргументами
+            LocalDate startDate = parseDate(promptFor("начальную дату", "YYYY-MM-DD"));
+            LocalDate endDate = parseDate(promptFor("конечную дату", "YYYY-MM-DD"));
 
             Report report = reportGenerator.generateSummaryReport(loggedInUser, startDate, endDate);
 
